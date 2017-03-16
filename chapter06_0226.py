@@ -22,22 +22,24 @@ def task_50(nlp_data):
 	# (. or ; or : or ? or !) → 空白文字 → 英大文字というパターンを文の区切りと見なし，入力された文書を1行1文の形式で出力せよ．
 
 	pattern = r'\.\s[A-Z]|\;\s[A-Z]|\:\s[A-Z]|\?\s[A-Z]|\!\s[A-Z]'
-	sentences = re.finditer(pattern,nlp_data)
+	sentences = re.finditer(pattern, nlp_data)
 
 	index_list=[]
+	sentence_list = []
 	for i,so in enumerate(sentences):
-		if i ==0:
+		if i == 0:
 			_0_index = so.end()-1
-			print nlp_data[0:_0_index].rstrip()
+			sentence_list.extend([nlp_data[:_0_index].rstrip()])
 
-			# インデックスを更新
+			print nlp_data[:_0_index].rstrip()
 			index_list.extend([_0_index])
+
 		else:
 			start_index = index_list[i-1]
 			end_index = so.end()-1
-			print nlp_data[start_index:end_index]
+			sentence_list.extend([nlp_data[start_index:end_index]])
 
-			# インデックスを更新
+			print nlp_data[start_index:end_index]
 			index_list.extend([end_index])
 
 	"""
@@ -63,21 +65,40 @@ def task_50(nlp_data):
 		- re.match/search/findall/finditer とかの使い分けが大事
 	"""
 
+	return sentence_list
+
+
+def task_51(sentence_list):
+
+	"""
+	51. 単語の切り出し
+	空白を単語の区切りとみなし，50の出力を入力として受け取り，1行1単語の形式で出力せよ．ただし，文の終端では空行を出力せよ．
+	"""
+
+	word_list = []
+	for sentence in sentence_list:
+		for word in re.split(" ", sentence):
+			if word[:-1] == ".":
+				print word,"\n"
+
+				eos_word = word+"\n"
+				word_list.extend([eos_word])
+			else:
+				print word
+				word_list.extend([word])
+
+	return word_list
+
+
+def task_52(word_list):
+
+
 	return
-
-
-def task_51():
-
-
-
-
-
-	return
-
 
 
 if __name__ == '__main__':
 	nlp_data = data_loader()
-	# task_50(nlp_data)
-	task_51(nlp_data)
+	sentence_list = task_50(nlp_data)
+	word_list = task_51(sentence_list)
+	task_52(word_list)
 
