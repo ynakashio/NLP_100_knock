@@ -6,6 +6,7 @@ import nltk
 import pandas as pd
 import numpy as np
 import re
+from stemming.porter2 import stem
 
 def data_loader():
 
@@ -79,12 +80,12 @@ def task_51(sentence_list):
 	for sentence in sentence_list:
 		for word in re.split(" ", sentence):
 			if word[:-1] == ".":
-				print word,"\n"
+				# print word,"\n"
 
 				eos_word = word+"\n"
 				word_list.extend([eos_word])
 			else:
-				print word
+				# print word
 				word_list.extend([word])
 
 	return word_list
@@ -92,6 +93,14 @@ def task_51(sentence_list):
 
 def task_52(word_list):
 
+	"""
+	52. ステミング
+	51の出力を入力として受け取り，Porterのステミングアルゴリズムを適用し，単語と語幹をタブ区切り形式で出力せよ． Pythonでは，Porterのステミングアルゴリズムの実装としてstemmingモジュールを利用するとよい．
+	(参照) https://pypi.python.org/pypi/stemming/1.0
+	ダウンロードして、"python setup.py install"を叩く！
+	"""
+	for word in word_list:
+		print word,"\t",stem(word)
 
 	return
 
