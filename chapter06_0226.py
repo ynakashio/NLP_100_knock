@@ -1,12 +1,15 @@
 #coding:utf-8
 
 import codecs
+import corenlp
 import csv
 import nltk
 import pandas as pd
 import numpy as np
 import re
+import subprocess
 from stemming.porter2 import stem
+import xml.etree.ElementTree as ET
 
 def data_loader():
 
@@ -97,7 +100,7 @@ def task_52(word_list):
 	52. ステミング
 	51の出力を入力として受け取り，Porterのステミングアルゴリズムを適用し，単語と語幹をタブ区切り形式で出力せよ． Pythonでは，Porterのステミングアルゴリズムの実装としてstemmingモジュールを利用するとよい．
 	(参照) https://pypi.python.org/pypi/stemming/1.0
-	ダウンロードして、"python setup.py install"を叩く！
+	ダウンロードして、"python setup.py install"を叩く！！
 	"""
 	for word in word_list:
 		print word,"\t",stem(word)
@@ -105,9 +108,51 @@ def task_52(word_list):
 	return
 
 
+def task_53(nlp_data):
+
+	"""
+	mecabなどと同様にanaconda以下のpipでインストールする。以下のコマンドでok。
+	.pyenv/versions/anaconda2-2.5.0/bin/pip install corenlp-python
+
+	(参照) http://qiita.com/yubessy/items/1869ac2c66f4e76cd6c5
+		corenlpのダウンロードするversionが古いと、エラー等で動かないことがある
+	"""
+
+	corenlp_dir = "/Users/yuko/stanford-corenlp-full-2015-04-20/"
+	parser = corenlp.StanfordCoreNLP(corenlp_path=corenlp_dir)
+
+	# print parser
+	# print parser.parse(nlp_data)
+
+	input_file_name = "sample_nlp.txt"
+	parsed_file_name = "parsed_nlp_data.xml"
+	f = open(parsed_file_name, "wb")
+
+	subprocess.check_output(
+			'java -cp "/Users/yuko/stanford-corenlp-full-2015-04-20/*"'
+			' -Xmx2g'
+			' edu.stanford.nlp.pipeline.StanfordCoreNLP'
+			' -annotators tokenize,ssplit,pos,lemma,ner,parse,dcoref'
+			' -file ' + input_file_name + ' 2>parse.out'#,
+			# shell=True,     # shellで実行
+			# check=True      # エラーチェックあり
+			)
+
+	# ただし、subprocess.run()はpython3系列からの関数
+
+	root = ET.parse(parsed_file_name)
+	for word in root.iter('word'):
+		print(word.text)
+
+	return
+
+
 if __name__ == '__main__':
 	nlp_data = data_loader()
-	sentence_list = task_50(nlp_data)
-	word_list = task_51(sentence_list)
-	task_52(word_list)
+	# sentence_list = task_50(nlp_data)
+	# word_list = task_51(sentence_list)
+	# task_52(word_list)
+	task_53(nlp_data)
+
+
 
