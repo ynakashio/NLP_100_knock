@@ -408,17 +408,17 @@ def task_59(root):
 
 if __name__ == '__main__':
 	nlp_data = data_loader()
-	# sentence_list = task_50(nlp_data)
-	# word_list = task_51(sentence_list)
-	# task_52(word_list)
-	# task_53(nlp_data)
+	sentence_list = task_50(nlp_data)
+	word_list = task_51(sentence_list)
+	task_52(word_list)
+	task_53(nlp_data)
 	tree,root = xml_loader()
-	# task_54(root)
-	# task_55(root)
+	task_54(root)
+	task_55(root)
 	task_56(nlp_data,tree,root)
-	# task_57(root)
-	# task_58(root)
-	# task_59(root)
+	task_57(root)
+	task_58(root)
+	task_59(root)
 
 
 
