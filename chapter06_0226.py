@@ -194,7 +194,7 @@ def task_55(tree):
 	(参考) http://qiita.com/segavvy/items/32b3a35825ec32586f33
 	"""
 	"""
-	PERのタグに含まれているタグは以下の8種類。
+	NERのタグに含まれているタグは以下の8種類。
 	{'DATE', 'DURATION', 'LOCATION', 'MISC', 'NUMBER', 'ORDINAL', 'ORGANIZATION', 'PERSON'}
 	このうち固有表現に当たるのは、"ORGANIZATION"と"PERSON"なので、今回はこの2つを抜き出す。
 	ところで、"MISC"ってなんですかね！調べたけどわからなかったです。
