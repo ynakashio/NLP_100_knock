@@ -118,11 +118,23 @@ def task_53(nlp_data):
 		corenlpのダウンロードするversionが古いと、エラー等で動かないことがある
 	"""
 
+	"""
+	xmlの作成には、以下のコマンドでok。
+	java -cp "*" -Xmx2g edu.stanford.nlp.pipeline.StanfordCoreNLP -annotators tokenize,ssplit,pos,lemma,ner,parse,dcoref -file input.txt
+	-file "input.txt"の部分を、インプットするファイル名に変える。
+	"""
+
+	xml_file_name = "./nlp.txt.xml"
+	root = ET.parse(xml_file_name)
+	for word in root.iter('word'):
+		print(word.text)
+
+	"""
+	 "subprocess" のモジュールを使うことで、コマンドラインでの作業を再現できるらしい。
+	 (参照) http://qiita.com/segavvy/items/ab6bb2b994aac061f51f
+
 	corenlp_dir = "/Users/yuko/stanford-corenlp-full-2015-04-20/"
 	parser = corenlp.StanfordCoreNLP(corenlp_path=corenlp_dir)
-
-	# print parser
-	# print parser.parse(nlp_data)
 
 	input_file_name = "sample_nlp.txt"
 	parsed_file_name = "parsed_nlp_data.xml"
@@ -133,16 +145,13 @@ def task_53(nlp_data):
 			' -Xmx2g'
 			' edu.stanford.nlp.pipeline.StanfordCoreNLP'
 			' -annotators tokenize,ssplit,pos,lemma,ner,parse,dcoref'
-			' -file ' + input_file_name + ' 2>parse.out'#,
-			# shell=True,     # shellで実行
-			# check=True      # エラーチェックあり
+			' -file ' + input_file_name + ' 2>parse.out',
+			shell=True,     # shellで実行
+			check=True      # エラーチェックあり
 			)
 
-	# ただし、subprocess.run()はpython3系列からの関数
-
-	root = ET.parse(parsed_file_name)
-	for word in root.iter('word'):
-		print(word.text)
+	ただし、subprocess.run()はpython3系列からの関数
+	"""
 
 	return
 
@@ -152,7 +161,7 @@ if __name__ == '__main__':
 	# sentence_list = task_50(nlp_data)
 	# word_list = task_51(sentence_list)
 	# task_52(word_list)
-	task_53(nlp_data)
+	# task_53(nlp_data)
 
 
 
