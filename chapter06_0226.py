@@ -155,7 +155,18 @@ def task_53(nlp_data):
 
 	return
 
-def task_54():
+def xml_loader():
+
+	# 53で書き出したxmlファイルをロードする
+
+	xml_file_name = "./nlp.txt.xml"
+	root = ET.parse(xml_file_name)
+
+	return root
+
+
+
+def task_54(root):
 
 	"""
 	54. 品詞タグ付け
@@ -163,17 +174,33 @@ def task_54():
 	(参照) http://qiita.com/segavvy/items/4d55805352089332828e
 	"""
 
-	xml_file_name = "./nlp.txt.xml"
-	root = ET.parse(xml_file_name)
-
 	for token in root.iter("token"):
 		print token.findtext("word"),"\t",token.findtext("lemma"),"\t",token.findtext("POS")
 
-	return
+	return root
 
 
-def task_55():
+def task_55(root):
 
+	"""
+	55. 固有表現抽出
+	入力文中の人名をすべて抜き出せ．
+	(参考) http://qiita.com/segavvy/items/32b3a35825ec32586f33
+	"""
+	"""
+	PERのタグに含まれているタグは以下の8種類。
+	{'DATE', 'DURATION', 'LOCATION', 'MISC', 'NUMBER', 'ORDINAL', 'ORGANIZATION', 'PERSON'}
+	このうち固有表現に当たるのは、"ORGANIZATION"と"PERSON"なので、今回はこの2つを抜き出す。
+	ところで、"MISC"ってなんですかね！調べたけどわからなかったです。
+
+	※ NER = Named Entity Recognition
+	"""
+	nerList=[]
+	for token in root.iter("token"):
+		if token.findtext("NER") == "ORGANIZATION" or token.findtext("NER") == "PERSON":
+			nerList.extend([token.findtext("word")])
+	print set(nerList)
+	# この結果だとなんかandとかofが入っている・・・・
 
 	return
 
@@ -191,7 +218,9 @@ if __name__ == '__main__':
 	# word_list = task_51(sentence_list)
 	# task_52(word_list)
 	# task_53(nlp_data)
-	task_54()
+	root = xml_loader()
+	# task_54(root)
+	task_55(root)
 
 
 
