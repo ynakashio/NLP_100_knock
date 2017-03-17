@@ -313,13 +313,12 @@ def task_58(root):
 	"""
 
 	for i,sentence in enumerate(root[0][0]):
-		# print i,"番目の文で主語・述語・目的語の揃っているものは..."
 		for dep in sentence[3]:
 
 			if "nsubj" in dep.get("type"):
 				nsubj_govnr = dep.find('./governor').text
 				nsubj_dep = dep.find('./dependent').text
-				# print nsubj_govnr
+
 			if "dobj" in dep.get("type"):
 				dobj_govnr = dep.find('./governor').text
 				dobj_dep = dep.find('./dependent').text
@@ -338,8 +337,25 @@ def task_59(root):
 	Stanford Core NLPの句構造解析の結果（S式）を読み込み，文中のすべての名詞句（NP）を表示せよ．入れ子になっている名詞句もすべて表示すること．
 	"""
 
-	return
+	"""
+	S式の中身はこんなん。
+	<parse>(ROOT (S (ADVP (RB Increasingly)) (, ,) (ADVP (RB however)) (, ,) (NP (NN research)) (VP (VBZ has) (VP (VBN focused) (PP (IN on) (NP (NP (JJ statistical) (NNS models)) (, ,) (SBAR (WHNP (WDT which)) (S (VP (VBP make) (NP (JJ soft) (, ,) (JJ probabilistic) (NNS decisions)) (PP (VBN based) (PP (IN on) (S (VP (VBG attaching) (NP (JJ real-valued) (NNS weights)) (PP (TO to) (NP (DT each) (NN input) (NN feature)))))))))))))) (. .))) </parse>
+	このNPを取ってくる。正規表現を適当に使う。
+	NPのすぐ左の(から、任意の数の()セットを終えて、)が得られるまでを取ってくる。
+	"""
 
+	NP_list=[]
+	for i,sentence in enumerate(root[0][0]):
+
+		_S = sentence.find("./parse").text,"\n"
+		tmp_list = re.findall(r"(\(NP\s(\((JJ|NN|NNS)\s\w+\)\s*)(\((JJ|NN|NNS)\s\w+\)\s*)+\))" ,_S[0])#parser.raw_parse(sentence)["sentences"][0]["parsetree"])
+		if not len(tmp_list) ==0:
+			NP_list.append(tmp_list)
+
+	for i in NP_list:
+		print i
+
+	return
 
 
 if __name__ == '__main__':
@@ -353,8 +369,8 @@ if __name__ == '__main__':
 	# task_55(root)
 	# task_56(nlp_data,root)
 	# task_57(root)
-	task_58(root)
-	# task_59(root)
+	# task_58(root)
+	task_59(root)
 
 
 
