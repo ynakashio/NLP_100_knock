@@ -5,6 +5,7 @@ import corenlp
 import csv
 import nltk
 import pandas as pd
+import pydot
 import numpy as np
 import re
 import subprocess
@@ -164,13 +165,14 @@ def xml_loader():
 	# 53で書き出したxmlファイルをロードする
 
 	xml_file_name = "./nlp.txt.xml"
-	root = ET.parse(xml_file_name)
+	tree = ET.parse(xml_file_name)
+	root = tree.getroot()
 
-	return root
+	return tree,root
 
 
 
-def task_54(root):
+def task_54(tree):
 
 	"""
 	54. 品詞タグ付け
@@ -178,13 +180,13 @@ def task_54(root):
 	(参照) http://qiita.com/segavvy/items/4d55805352089332828e
 	"""
 
-	for token in root.iter("token"):
+	for token in tree.iter("token"):
 		print token.findtext("word"),"\t",token.findtext("lemma"),"\t",token.findtext("POS")
 
-	return root
+	return
 
 
-def task_55(root):
+def task_55(tree):
 
 	"""
 	55. 固有表現抽出
@@ -200,7 +202,7 @@ def task_55(root):
 	※ NER = Named Entity Recognition
 	"""
 	nerList=[]
-	for token in root.iter("token"):
+	for token in tree.iter("token"):
 		if token.findtext("NER") == "ORGANIZATION" or token.findtext("NER") == "PERSON":
 			nerList.extend([token.findtext("word")])
 	print set(nerList)
@@ -209,7 +211,7 @@ def task_55(root):
 	return
 
 
-def task_56(root):
+def task_56(nlp_data,tree,root):
 	"""
 	56. 共参照解析
 	Stanford Core NLPの共参照解析の結果に基づき，文中の参照表現（mention）を代表参照表現（representative mention）に置換せよ．ただし，置換するときは，「代表参照表現（参照表現）」のように，元の参照表現が分かるように配慮せよ．
@@ -244,17 +246,76 @@ def task_56(root):
 	"""
 
 	# 例えば、参照されている元の表現はこれで全部
-	for mention in root.iter("coreference"):
-		print mention[0][4].text
+	# for mention in root.iter("coreference"):
+	# 	print mention[0][4].text
+
+	for i,mention in enumerate(root.iter("coreference")):
+		if i > 0:			# i == 0 の時は、引用関係のあるcoreferenceのセットを数えている。今回は36個あった
+			print i,"番目の参照関係の修復をする..."
+
+			for j in range(0,len(mention)):
+				if j > 0:	# j==0の時が参照元、j>0 の時に参照関係を修復する
+
+					for e_root in root.iter():
+						print mention[e_root.findtext("start"):e_root.findtext("end")][0].text
+
+					# print mention[j][4].text
 
 	return
 
-def task_57():
+def task_57(root):
 
 	"""
 	57. 係り受け解析
 	Stanford Core NLPの係り受け解析の結果（collapsed-dependencies）を有向グラフとして可視化せよ．可視化には，係り受け木をDOT言語に変換し，Graphvizを用いるとよい．また，Pythonから有向グラフを直接的に可視化するには，pydotを使うとよい．
 	"""
+	"""
+	具体的には、ROOTと各単語、依存関係の発生している方向を各エッジについて読み込んで、それを描画すればok.
+	"""
+
+	# ひとまず、依存関係を各文章毎に書き出してみる
+	edge_list=[]
+	for i,sentence in enumerate(root[0][0]):
+		print i,"番目の文の依存関係は..."
+		tmp=[]
+		for depth in sentence[3]:
+			print depth[0].text,"->",depth[1].text
+			tmp.append(tuple([depth[0].text,depth[1].text]))
+		edge_list.append(tmp)
+		print "\n"
+
+	# 同じディレクトリ以下にgraph_pngという書き出し用のディレクトリを作成。。。
+	for i,edges in enumerate(edge_list):
+		g=pydot.graph_from_edges(edges, directed=True)
+		file_name = "./graph_png/nlp_"+str(i)+".png"
+		g.write_png(file_name, prog='dot')
+
+	return
+
+
+def task_58(root):
+
+	"""
+	58. タプルの抽出
+	Stanford Core NLPの係り受け解析の結果（collapsed-dependencies）に基づき，「主語 述語 目的語」の組をタブ区切り形式で出力せよ．ただし，主語，述語，目的語の定義は以下を参考にせよ．
+
+    述語: nsubj関係とdobj関係の子（dependant）を持つ単語
+    主語: 述語からnsubj関係にある子（dependent）
+    目的語: 述語からdobj関係にある子（dependent）
+
+	(参照) http://kenichia.hatenablog.com/entry/2016/02/15/192635
+	"""
+
+
+
+
+	return
+
+
+
+def task_59(root):
+
+
 
 	return
 
@@ -266,10 +327,13 @@ if __name__ == '__main__':
 	# word_list = task_51(sentence_list)
 	# task_52(word_list)
 	# task_53(nlp_data)
-	root = xml_loader()
+	tree,root = xml_loader()
 	# task_54(root)
 	# task_55(root)
-	task_56(root)
+	# task_56(nlp_data,root)
+	task_57(root)
+	# task_58(root)
+	# task_59(root)
 
 
 
