@@ -215,7 +215,9 @@ def task_56(nlp_data,tree,root):
 	"""
 	56. 共参照解析
 	Stanford Core NLPの共参照解析の結果に基づき，文中の参照表現（mention）を代表参照表現（representative mention）に置換せよ．ただし，置換するときは，「代表参照表現（参照表現）」のように，元の参照表現が分かるように配慮せよ．
-	(参考) http://kenichia.hatenablog.com/entry/2016/02/15/192635
+
+	(参考) 	http://kenichia.hatenablog.com/entry/2016/02/15/192635
+			http://qiita.com/segavvy/items/0340d3d71c9151265bcb
 	"""
 
 	"""
@@ -250,38 +252,64 @@ def task_56(nlp_data,tree,root):
 	# 	print mention[0][4].text
 
 
+	# 56について以下は、ここからほぼ借用しています => http://qiita.com/segavvy/items/0340d3d71c9151265bcb
+
 	# 修正に必要な情報をまとめる。キーは参照元の名詞句、値は参照先の名詞句のアドレスを何らかの形で。
 	modify_dic={}
-	for i,mention in enumerate(tree.iter("coreference")):
-		if i > 0:			# i == 0 の時は、引用関係のあるcoreferenceのセットを数えている。今回は36個あった
-			print i,"番目の文の参照関係の修復をする..."
-			print mention("text")
-			modify_dic.update({i:{}})
+	for coreference in root.iterfind('./document/coreference/coreference'):
 
-			address_list=[]
-			for j in range(0,len(mention)):
-				if j == 1:	# j==0の時が参照元、j>0 の時に参照関係を修復する
-					refered_text = mention.findtext("text")
-					print refered_text
-				else:
-					sent_index	= mention.findtext("sentence")
-					start_index = mention.findtext("start")
-					end_index 	= mention.findtext("end")
-					target_text	= mention.findtext("text")
-					_tmp = [sent_index,start_index,end_index,target_text]
+		# 代表参照表現の取得
+		refered_text = coreference.findtext('./mention[@representative="true"]/text')
 
-				address_list.append(_tmp)
-			# print address_list
-				# modify_dic[i].update({refered_text:})
+		# 代表参照表現以外のmention列挙、辞書に追加
+		for mention in coreference.iterfind('./mention'):
+			if mention.get('representative', 'false') == 'false':
 
-					# for e_root in root.iter():
-					# 	print
-					# print mention[j][4].text
+			# 必要な情報の抽出
+				sent_id = int(mention.findtext('sentence'))
+				start_index = int(mention.findtext('start'))
+				end_index = int(mention.findtext('end'))
 
+				if not (sent_id, start_index) in modify_dic:
+					modify_dic[(sent_id, start_index)] = (end_index, refered_text)
 
-	# 置き換えながら表示
+	# ここから修正しながら表示する
+	for sentence in root.iterfind('./document/sentences/sentence'):
+		sent_id = int(sentence.get('id'))       # sentenceのid
+		org_rest = 0                            # 置換中のtoken数の残り
+		string_array = ""
+
+		# token列挙
+		for token in sentence.iterfind('./tokens/token'):
+			token_id = int(token.get('id'))     # tokenのid
+
+			# 置換対象？
+			if org_rest == 0 and (sent_id, token_id) in modify_dic:
+
+            	# 辞書から終了位置と代表参照表現を取り出し
+				(end, rep_text) = modify_dic[(sent_id, token_id)]
+
+				# 代表参照表現＋カッコを挿入
+				string_array = string_array + '[' + refered_text + ']' + " "
+				# print '[' + refered_text + ']'
+				org_rest = end - token_id       # 置換中のtoken数の残り
+
+			# token出力
+			string_array = string_array + token.findtext('word') +" "
+			# print token.findtext('word')
+
+	        # 置換の終わりなら閉じカッコを挿入
+			if org_rest > 0:
+				org_rest -= 1
+			# if org_rest == 0:
+				# string_array = string_array + ')'
+				# print(')')
+
+		print string_array
 
 	return
+
+
 
 def task_57(root):
 
