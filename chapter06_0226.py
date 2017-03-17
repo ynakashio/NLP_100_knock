@@ -278,9 +278,9 @@ def task_57(root):
 	for i,sentence in enumerate(root[0][0]):
 		print i,"番目の文の依存関係は..."
 		tmp=[]
-		for depth in sentence[3]:
-			print depth[0].text,"->",depth[1].text
-			tmp.append(tuple([depth[0].text,depth[1].text]))
+		for dependency in sentence[3]:
+			print dependency[0].text,"->",dependency[1].text
+			tmp.append(tuple([dependency[0].text,dependency[1].text]))
 		edge_list.append(tmp)
 		print "\n"
 
@@ -303,11 +303,29 @@ def task_58(root):
     主語: 述語からnsubj関係にある子（dependent）
     目的語: 述語からdobj関係にある子（dependent）
 
-	(参照) http://kenichia.hatenablog.com/entry/2016/02/15/192635
+	(参照) 	http://qiita.com/segavvy/items/f100fc38e350ad14b679
+			http://kenichia.hatenablog.com/entry/2016/02/15/192635
 	"""
 
+	"""
+	処理の内容:
+	各文に対して、述語をfixして、それに紐づく主語と目的語を抽出する
+	"""
 
+	for i,sentence in enumerate(root[0][0]):
+		# print i,"番目の文で主語・述語・目的語の揃っているものは..."
+		for dep in sentence[3]:
 
+			if "nsubj" in dep.get("type"):
+				nsubj_govnr = dep.find('./governor').text
+				nsubj_dep = dep.find('./dependent').text
+				# print nsubj_govnr
+			if "dobj" in dep.get("type"):
+				dobj_govnr = dep.find('./governor').text
+				dobj_dep = dep.find('./dependent').text
+
+				if nsubj_govnr == dobj_govnr:
+					print nsubj_dep,"\t",dobj_govnr,"\t",dobj_dep
 
 	return
 
@@ -315,7 +333,10 @@ def task_58(root):
 
 def task_59(root):
 
-
+	"""
+	59. S式の解析
+	Stanford Core NLPの句構造解析の結果（S式）を読み込み，文中のすべての名詞句（NP）を表示せよ．入れ子になっている名詞句もすべて表示すること．
+	"""
 
 	return
 
@@ -331,8 +352,8 @@ if __name__ == '__main__':
 	# task_54(root)
 	# task_55(root)
 	# task_56(nlp_data,root)
-	task_57(root)
-	# task_58(root)
+	# task_57(root)
+	task_58(root)
 	# task_59(root)
 
 
