@@ -127,7 +127,7 @@ def task_53(nlp_data):
 	xml_file_name = "./nlp.txt.xml"
 	root = ET.parse(xml_file_name)
 	for word in root.iter('word'):
-		print(word.text)
+		print word.text
 
 	"""
 	 "subprocess" のモジュールを使うことで、コマンドラインでの作業を再現できるらしい。
@@ -155,6 +155,35 @@ def task_53(nlp_data):
 
 	return
 
+def task_54():
+
+	"""
+	54. 品詞タグ付け
+	Stanford Core NLPの解析結果XMLを読み込み，単語，レンマ，品詞をタブ区切り形式で出力せよ．
+	(参照) http://qiita.com/segavvy/items/4d55805352089332828e
+	"""
+
+	xml_file_name = "./nlp.txt.xml"
+	root = ET.parse(xml_file_name)
+
+	for token in root.iter("token"):
+		print token.findtext("word"),"\t",token.findtext("lemma"),"\t",token.findtext("POS")
+
+	return
+
+
+def task_55():
+
+
+	return
+
+
+def task_56():
+
+
+	return
+
+
 
 if __name__ == '__main__':
 	nlp_data = data_loader()
@@ -162,6 +191,7 @@ if __name__ == '__main__':
 	# word_list = task_51(sentence_list)
 	# task_52(word_list)
 	# task_53(nlp_data)
+	task_54()
 
 
 
