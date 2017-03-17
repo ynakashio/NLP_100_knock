@@ -11,6 +11,10 @@ import subprocess
 from stemming.porter2 import stem
 import xml.etree.ElementTree as ET
 
+
+# (参考) https://m-note.github.io/100knock/100knock_Chap%206.html
+
+
 def data_loader():
 
 	f = open("./nlp.txt","rb")
@@ -205,22 +209,67 @@ def task_55(root):
 	return
 
 
-def task_56():
+def task_56(root):
+	"""
+	56. 共参照解析
+	Stanford Core NLPの共参照解析の結果に基づき，文中の参照表現（mention）を代表参照表現（representative mention）に置換せよ．ただし，置換するときは，「代表参照表現（参照表現）」のように，元の参照表現が分かるように配慮せよ．
+	(参考) http://kenichia.hatenablog.com/entry/2016/02/15/192635
+	"""
 
+	"""
+	指示語を元の語に復元する。
+	xmlファイルの構造は2つ => <sentences>と<coreference>
+
+	=> <coreference>の部分をいじくる。
+	例えば...
+	<coreference>
+	<mention representative="true">		=> 参照元となっている、元の単語・フレーズ
+          <sentence>20</sentence>		=> 20文目の
+          <start>17</start>				=> 17単語目から始まり
+          <end>25</end>					=> 25単語目で終わる
+          <head>19</head>				=> 係り受けでこのフレーズで核をなす単語は19単語目。今回なら"rules"
+          <text>hard if-then rules similar to existing hand-written rules</text>
+        </mention>
+        <mention>						=> 二つ目以降のmentionが、一つ目のmentionを参照している
+          <sentence>20</sentence>		=> 具体的には、20文目の7~8単語目にある"algorithms"
+          <start>7</start>
+          <end>8</end>
+          <head>7</head>
+          <text>algorithms</text>
+        </mention>
+      </coreference>					=> ここで参照関係の記述終わり。
+	こんな感じの中身。
+
+	=> 具体的に行う処理は、mention(2つ目以降)にある単語を特定して、そこにmention representative="true"を代入する、という作業になりそう。
+	"""
+
+	# 例えば、参照されている元の表現はこれで全部
+	for mention in root.iter("coreference"):
+		print mention[0][4].text
+
+	return
+
+def task_57():
+
+	"""
+	57. 係り受け解析
+	Stanford Core NLPの係り受け解析の結果（collapsed-dependencies）を有向グラフとして可視化せよ．可視化には，係り受け木をDOT言語に変換し，Graphvizを用いるとよい．また，Pythonから有向グラフを直接的に可視化するには，pydotを使うとよい．
+	"""
 
 	return
 
 
 
 if __name__ == '__main__':
-	nlp_data = data_loader()
+	# nlp_data = data_loader()
 	# sentence_list = task_50(nlp_data)
 	# word_list = task_51(sentence_list)
 	# task_52(word_list)
 	# task_53(nlp_data)
 	root = xml_loader()
 	# task_54(root)
-	task_55(root)
+	# task_55(root)
+	task_56(root)
 
 
 
