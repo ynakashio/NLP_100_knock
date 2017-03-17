@@ -249,17 +249,37 @@ def task_56(nlp_data,tree,root):
 	# for mention in root.iter("coreference"):
 	# 	print mention[0][4].text
 
-	for i,mention in enumerate(root.iter("coreference")):
+
+	# 修正に必要な情報をまとめる。キーは参照元の名詞句、値は参照先の名詞句のアドレスを何らかの形で。
+	modify_dic={}
+	for i,mention in enumerate(tree.iter("coreference")):
 		if i > 0:			# i == 0 の時は、引用関係のあるcoreferenceのセットを数えている。今回は36個あった
-			print i,"番目の参照関係の修復をする..."
+			print i,"番目の文の参照関係の修復をする..."
+			print mention("text")
+			modify_dic.update({i:{}})
 
+			address_list=[]
 			for j in range(0,len(mention)):
-				if j > 0:	# j==0の時が参照元、j>0 の時に参照関係を修復する
+				if j == 1:	# j==0の時が参照元、j>0 の時に参照関係を修復する
+					refered_text = mention.findtext("text")
+					print refered_text
+				else:
+					sent_index	= mention.findtext("sentence")
+					start_index = mention.findtext("start")
+					end_index 	= mention.findtext("end")
+					target_text	= mention.findtext("text")
+					_tmp = [sent_index,start_index,end_index,target_text]
 
-					for e_root in root.iter():
-						print mention[e_root.findtext("start"):e_root.findtext("end")][0].text
+				address_list.append(_tmp)
+			# print address_list
+				# modify_dic[i].update({refered_text:})
 
+					# for e_root in root.iter():
+					# 	print
 					# print mention[j][4].text
+
+
+	# 置き換えながら表示
 
 	return
 
@@ -348,9 +368,9 @@ def task_59(root):
 	for i,sentence in enumerate(root[0][0]):
 
 		_S = sentence.find("./parse").text,"\n"
-		tmp_list = re.findall(r"(\(NP\s(\((JJ|NN|NNS)\s\w+\)\s*)(\((JJ|NN|NNS)\s\w+\)\s*)+\))" ,_S[0])#parser.raw_parse(sentence)["sentences"][0]["parsetree"])
+		tmp_list = re.findall(r"(\(NP\s(\((JJ|NN|NNS)\s\w+\)\s*)(\((JJ|NN|NNS)\s\w+\)\s*)+\))" ,_S[0])
 		if not len(tmp_list) ==0:
-			NP_list.append(tmp_list)
+			NP_list.extend(tmp_list)
 
 	for i in NP_list:
 		print i
@@ -359,7 +379,7 @@ def task_59(root):
 
 
 if __name__ == '__main__':
-	# nlp_data = data_loader()
+	nlp_data = data_loader()
 	# sentence_list = task_50(nlp_data)
 	# word_list = task_51(sentence_list)
 	# task_52(word_list)
@@ -367,10 +387,10 @@ if __name__ == '__main__':
 	tree,root = xml_loader()
 	# task_54(root)
 	# task_55(root)
-	# task_56(nlp_data,root)
+	task_56(nlp_data,tree,root)
 	# task_57(root)
 	# task_58(root)
-	task_59(root)
+	# task_59(root)
 
 
 
