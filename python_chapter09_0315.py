@@ -149,6 +149,7 @@ def task_83(wiki_data):
 	f(∗,c):	文脈語cの出現回数
 	N: 		単語と文脈語のペアの総出現回数
 	"""
+	# input_file = "resample.txt"
 	input_file = "./82_sample.txt"
 	f = open(input_file,"r")
 	tabbed_context = f.read()
@@ -182,8 +183,10 @@ def task_83(wiki_data):
 	g = open(output_file,"w")
 	g.write(str(len(tabbed_list)))
 	g.write("\n")
+
+	writer=csv.writer(g)
 	for i in frequency_list:
-		g.write(i)
+		writer.writerow(i)
 	g.close
 
 	return
@@ -193,23 +196,52 @@ def task_84(wiki_data):
 	"""
 	84. 単語文脈行列の作成
 	83の出力を利用し，単語文脈行列Xを作成せよ．ただし，行列Xの各要素Xtcは次のように定義する．
-    f(t,c)≥10 ならば，Xtc=PPMI(t,c)=max{logN×f(t,c)f(t,∗)×f(∗,c),0}
-    f(t,c)<10 ならば，Xtc=0
+	f(t,c)≥10 ならば，Xtc=PPMI(t,c)=max{logN×f(t,c)f(t,∗)×f(∗,c),0}
+	f(t,c)<10 ならば，Xtc=0
 	ここで，PPMI(t,c)はPositive Pointwise Mutual Information（正の相互情報量）と呼ばれる統計量である．なお，行列Xの行数・列数は数百万オーダとなり，行列のすべての要素を主記憶上に載せることは無理なので注意すること．幸い，行列Xのほとんどの要素は0になるので，非0の要素だけを書き出せばよい．
 	"""
 
+	N = int(87867)
+
+	# 一行目を削除してからファイルを開いてください
 	input_file = "./83_sample.csv"
 	freq_df = pd.read_csv(input_file,header=None)
-	freq_df.columns = ["f(t,c)","f(t,*)","f(*,c)"]
+	freq_df.columns = ["collocation","tc","t*","*c"]
 	# print freq_df
-	over10_df = freq_df.query("f(t,c) >= 10")
+	over10_df = freq_df.query("tc >= 10")
+	under10_df = freq_df.query("tc < 10")
+	print len(freq_df),"のうち計算するのは",len(over10_df),"だけ"
 
-	def calc_PPMI(series):
+	def calc_PPMI(tc_list):
+		N = int(87867)
+		return max(np.log(N*tc_list[1]/tc_list[1]*tc_list[2]),0)
 
-		return
+	_dic = {}
+	for i,tc_row in over10_df.iterrows():
+		# print tc_row[0],"\t",calc_PPMI(tc_row.tolist())
+		_dic.update({tc_row[0]:{"ppmi":calc_PPMI(tc_row.tolist())}})
+	ppmi_df = pd.DataFrame.from_dict(_dic).T
+
+	_dic = {}
+	for collocation in under10_df["collocation"]:
+		_dic.update({collocation:{"ppmi":0}})
+	_0_df = pd.DataFrame.from_dict(_dic).T
+
+	output_df = pd.concat([ppmi_df,_0_df])
+	print output_df
+	output_df.to_csv("84_sample.csv")#,index=False)
+
+	return
+
+
+def task_85(wiki_data):
+
+	input_name = "./84_sample.csv"
+	main_df = pd.read_csv()
 
 
 	return
+
 
 
 if __name__ == '__main__':
@@ -217,7 +249,7 @@ if __name__ == '__main__':
 	# task_80(wiki_data)
 	# task_81(wiki_data)
 	# task_82(wiki_data)
-	task_83(wiki_data)
+	# task_83(wiki_data)
 	task_84(wiki_data)
-
+	task_85(wiki_data)
 

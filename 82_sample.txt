@@ -1,33 +1,3 @@
-	depicted
-	in
-	a
-	fantasy
-	novel.:
-	Anarchism
-
-Anarchism
-	is
-	a
-	political
-Anarchism
-
-Anarchism	novel.:
-Anarchism
-
-Anarchism	
-Anarchism
-
-Anarchism	is
-is	novel.:
-is	
-is	Anarchism
-
-Anarchism
-is	a
-is	political
-a	Anarchism
-
-Anarchism
 a	is
 a	political
 political	is
