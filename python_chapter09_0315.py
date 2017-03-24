@@ -2,6 +2,7 @@
 
 import csv
 import codecs
+import random
 import numpy as np
 from nltk import tokenize
 import os
@@ -40,8 +41,6 @@ def task_80(wiki_data):
 	# これを参考にした
 	# => http://qiita.com/segavvy/items/ea485e66dd96eee891da
 
-	output_name = './80_sample.txt'
-
 	word_list=[]
 	for chunk in wiki_data.split(' '):
 		token = chunk.strip('.,!?;:()[]\'"').strip()
@@ -52,6 +51,8 @@ def task_80(wiki_data):
 	for word in word_list:
 		output_str = output_str + " " + word
 	print output_str
+
+	output_name = './80_sample.txt'
 	f = open(output_name,"w")
 	f.write(output_str)
 	f.close
@@ -93,15 +94,57 @@ def task_81(wiki_data):
 
 	return
 
-def task_82()
 
+def task_82(wiki_data):
+
+	"""
+	82. 文脈の抽出
+	81で作成したコーパス中に出現するすべての単語tに関して，単語tと文脈語cのペアをタブ区切り形式ですべて書き出せ．ただし，文脈語の定義は次の通りとする．
+    ある単語tの前後d単語を文脈語cとして抽出する（ただし，文脈語に単語tそのものは含まない）
+    単語tを選ぶ度に，文脈幅dは{1,2,3,4,5}の範囲でランダムに決める．
+	"""
+
+	# つまり、全ての単語に対して、文脈幅dをランダムに選んで表示するという問題?
+
+	f = open("./80_sample.txt","r")
+	wiki_data = f.read()
+	# print wiki_data
+
+	# リストにして配列番号で処理
+	splited_data = wiki_data.split(" ")
+
+	output_string = ""
+	for target_index,target_word in enumerate(splited_data):
+
+		plut_count = random.randint(1,5)
+		minus_count = 0 - int(plut_count)
+
+		for i in range(minus_count,plut_count):
+			if i != 0:
+				context_index = int(target_index)+int(i)
+
+				try:
+					# print plut_count
+					tab_separted_context = target_word+"\t"+splited_data[context_index]+"\n"
+					output_string = output_string + tab_separted_context
+					# print tab_separted_context
+				except:
+					print context_index,"nan"
+	print output_string
+
+	output_file = "82_sample.txt"
+	g = open(output_file,"w")
+	g.write(output_string)
+
+	print "Alexanderなどバグ取りがまだ"
 
 	return
+
 
 if __name__ == '__main__':
 	wiki_data = data_loader()
 	# task_80(wiki_data)
-	task_81(wiki_data)
+	# task_81(wiki_data)
 	task_82(wiki_data)
 
 
