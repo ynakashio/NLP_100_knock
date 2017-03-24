@@ -2,6 +2,7 @@
 
 import csv
 import codecs
+from collections import Counter
 import random
 import numpy as np
 from nltk import tokenize
@@ -108,7 +109,6 @@ def task_82(wiki_data):
 
 	f = open("./80_sample.txt","r")
 	wiki_data = f.read()
-	# print wiki_data
 
 	# リストにして配列番号で処理
 	splited_data = wiki_data.split(" ")
@@ -124,10 +124,8 @@ def task_82(wiki_data):
 				context_index = int(target_index)+int(i)
 
 				try:
-					# print plut_count
 					tab_separted_context = target_word+"\t"+splited_data[context_index]+"\n"
 					output_string = output_string + tab_separted_context
-					# print tab_separted_context
 				except:
 					print context_index,"nan"
 	print output_string
@@ -141,11 +139,85 @@ def task_82(wiki_data):
 	return
 
 
+def task_83(wiki_data):
+
+	"""
+	83. 単語／文脈の頻度の計測
+	82の出力を利用し，以下の出現分布，および定数を求めよ．
+    f(t,c):	単語tと文脈語cの共起回数
+    f(t,∗):	単語tの出現回数
+	f(∗,c):	文脈語cの出現回数
+	N: 		単語と文脈語のペアの総出現回数
+	"""
+	input_file = "./82_sample.txt"
+	f = open(input_file,"r")
+	tabbed_context = f.read()
+
+	# 任意の組み合わせについて、上記の4種類を計算するという感じ
+
+	# 組み合わせを作る => Counter使ったら楽そう
+	tabbed_list = []
+	for context in tabbed_context.split("\n"):
+		context_tmp = [i.lower() for i in context.split("\t")]
+		context_tmp = tuple(context_tmp)
+		tabbed_list.append(context_tmp)
+	print len(tabbed_list),"=>",len(set(tabbed_list))
+	collocated_list = set(filter(lambda x: len(x)>1,tabbed_list))
+
+	frequency_list=[]
+	for collocation in collocated_list:
+		# print collocation,"の組み合わせをチェックする"
+		_search = collocation[0]+"\t"+collocation[1]
+
+		# print "f(t,c):\t",tabbed_context.count(_search)
+		# print "f(t,*):\t",tabbed_context.count(collocation[0])
+		# print "f(*,c):\t",tabbed_context.count(collocation[1])
+		tmp = [_search,tabbed_context.count(_search),tabbed_context.count(collocation[0]),tabbed_context.count(collocation[1])]
+		frequency_list.append(tmp)
+
+	print frequency_list
+	print "N:",len(tabbed_list)
+
+	output_file = "./83_sample.csv"
+	g = open(output_file,"w")
+	g.write(str(len(tabbed_list)))
+	g.write("\n")
+	for i in frequency_list:
+		g.write(i)
+	g.close
+
+	return
+
+def task_84(wiki_data):
+
+	"""
+	84. 単語文脈行列の作成
+	83の出力を利用し，単語文脈行列Xを作成せよ．ただし，行列Xの各要素Xtcは次のように定義する．
+    f(t,c)≥10 ならば，Xtc=PPMI(t,c)=max{logN×f(t,c)f(t,∗)×f(∗,c),0}
+    f(t,c)<10 ならば，Xtc=0
+	ここで，PPMI(t,c)はPositive Pointwise Mutual Information（正の相互情報量）と呼ばれる統計量である．なお，行列Xの行数・列数は数百万オーダとなり，行列のすべての要素を主記憶上に載せることは無理なので注意すること．幸い，行列Xのほとんどの要素は0になるので，非0の要素だけを書き出せばよい．
+	"""
+
+	input_file = "./83_sample.csv"
+	freq_df = pd.read_csv(input_file,header=None)
+	freq_df.columns = ["f(t,c)","f(t,*)","f(*,c)"]
+	# print freq_df
+	over10_df = freq_df.query("f(t,c) >= 10")
+
+	def calc_PPMI(series):
+
+		return
+
+
+	return
+
+
 if __name__ == '__main__':
 	wiki_data = data_loader()
 	# task_80(wiki_data)
 	# task_81(wiki_data)
-	task_82(wiki_data)
-
+	# task_82(wiki_data)
+	task_83(wiki_data)
+	task_84(wiki_data)
 
 
