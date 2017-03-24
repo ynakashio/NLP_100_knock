@@ -29,6 +29,14 @@ def data_loader():
 
 def task_80(wiki_data):
 
+	"""
+	80. コーパスの整形
+	文を単語列に変換する最も単純な方法は，空白文字で単語に区切ることである． ただ，この方法では文末のピリオドや括弧などの記号が単語に含まれてしまう． そこで，コーパスの各行のテキストを空白文字でトークンのリストに分割した後，各トークンに以下の処理を施し，単語から記号を除去せよ．
+    トークンの先頭と末尾に出現する次の文字を削除: .,!?;:()[]'"
+    空文字列となったトークンは削除
+	以上の処理を適用した後，トークンをスペースで連結してファイルに保存せよ．
+	"""
+
 	# これを参考にした
 	# => http://qiita.com/segavvy/items/ea485e66dd96eee891da
 
@@ -55,13 +63,46 @@ def task_80(wiki_data):
 	return
 
 
-def task_81():
+def task_81(wiki_data):
+
+	"""
+	81. 複合語からなる国名への対処
+	英語では，複数の語の連接が意味を成すことがある．例えば，アメリカ合衆国は"United States"，イギリスは"United Kingdom"と表現されるが，"United"や"States"，"Kingdom"という単語だけでは，指し示している概念・実体が曖昧である．
+	そこで，コーパス中に含まれる複合語を認識し，複合語を1語として扱うことで，複合語の意味を推定したい．
+	しかしながら，複合語を正確に認定するのは大変むずかしいので，ここでは複合語からなる国名を認定したい．
+	インターネット上から国名リストを各自で入手し，80のコーパス中に出現する複合語の国名に関して，スペースをアンダーバーに置換せよ．例えば，"United States"は"United_States"，"Isle of Man"は"Isle_of_Man"になるはずである．
+	"""
+	# 国名かここから
+	# http://www.listofcountriesoftheworld.com/
+
+	# tokenizeして、一単語目が同じだったらくっつけるメソッド
+
+
+	country_name_file = "./country_name.txt"
+	f = open(country_name_file,"r")
+	countries = f.read()
+
+	# 一単語目をkey、単語全体をvalueとして入れている
+	country_name_dic = {}
+	for name in countries.split("\n"):
+		if len(name.split(" ")) > 2:
+			country_name_dic.update({name.split(" ")[0]:name})
+	print "以下を単語辞書としてマッチさせる\n",country_name_dic
+
+	# とりあえず先に進む
+
+	return
+
+def task_82()
 
 
 	return
 
-
-
 if __name__ == '__main__':
 	wiki_data = data_loader()
-	task_80(wiki_data)
+	# task_80(wiki_data)
+	task_81(wiki_data)
+	task_82(wiki_data)
+
+
+
