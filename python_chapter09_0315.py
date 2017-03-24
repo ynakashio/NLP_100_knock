@@ -18,9 +18,9 @@ import pandas as pd
 
 def data_loader():
 
-	file_name = "./sample.txt"
+	input_name = './sample.txt'
 	# file_name = "./enwiki-20150112-400-r100-10576.txt"
-	f = codecs.open(file_name, "r","utf-8")
+	f = codecs.open(input_name, "r","utf-8")
 	wiki_data = str(f.read()).decode("utf-8")
 	f.close
 
@@ -29,16 +29,33 @@ def data_loader():
 
 def task_80(wiki_data):
 
-	tmp_tokenized_data = tokenize.word_tokenize(wiki_data)
+	# これを参考にした
+	# => http://qiita.com/segavvy/items/ea485e66dd96eee891da
 
-	for word in tmp_tokenized_data:
-		print re.sub(re.compile('.,!?;:()[]'), '', word)
-		
+	output_name = './80_sample.txt'
+
+	word_list=[]
+	for chunk in wiki_data.split(' '):
+		token = chunk.strip('.,!?;:()[]\'"').strip()
+		if len(token) > 0:
+			word_list.append(str(token))
+
+	output_str = ""
+	for word in word_list:
+		output_str = output_str + " " + word
+	print output_str
+	f = open(output_name,"w")
+	f.write(output_str)
+	f.close
+
+	# 以下は正規表現でやろうとして失敗。誰か教えてくださいw
+	# for tokenized_word in tokenize.word_tokenize(wiki_data):
+	# 	word_list.append(re.sub(re.compile(".,!?;:()\[]"), "", str(tokenized_word)))
 
 	return
 
 
-def task_82():
+def task_81():
 
 
 	return
