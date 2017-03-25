@@ -2,11 +2,14 @@
 
 import csv
 import codecs
-from collections import Counter
+from collections import Counter,OrderedDict
+from itertools import chain
 import random
 import numpy as np
 from nltk import tokenize
 import os
+import pickle
+from scipy import sparse, io
 import sys
 reload(sys)
 sys.setdefaultencoding("utf-8")
@@ -201,6 +204,10 @@ def task_84(wiki_data):
 	ここで，PPMI(t,c)はPositive Pointwise Mutual Information（正の相互情報量）と呼ばれる統計量である．なお，行列Xの行数・列数は数百万オーダとなり，行列のすべての要素を主記憶上に載せることは無理なので注意すること．幸い，行列Xのほとんどの要素は0になるので，非0の要素だけを書き出せばよい．
 	"""
 
+	# 一部ここを参考にした
+	# http://qiita.com/segavvy/items/21455b802e34a9e49f92d
+	# http://d.hatena.ne.jp/billest/20090906/1252269157
+
 	N = int(87867)
 
 	# 一行目を削除してからファイルを開いてください
@@ -218,23 +225,43 @@ def task_84(wiki_data):
 
 	_dic = {}
 	for i,tc_row in over10_df.iterrows():
-		# print tc_row[0],"\t",calc_PPMI(tc_row.tolist())
 		_dic.update({tc_row[0]:{"ppmi":calc_PPMI(tc_row.tolist())}})
 	ppmi_df = pd.DataFrame.from_dict(_dic).T
 
-	_dic = {}
-	for collocation in under10_df["collocation"]:
-		_dic.update({collocation:{"ppmi":0}})
-	_0_df = pd.DataFrame.from_dict(_dic).T
+	freq_df["term"] = freq_df["collocation"].str.split("\t").apply(lambda x: x[0])
+	freq_df["col"] = freq_df["collocation"].str.split("\t").apply(lambda x: x[1])
 
-	output_df = pd.concat([ppmi_df,_0_df])
-	print output_df
-	output_df.to_csv("84_sample.csv")#,index=False)
+	dict_index_t = OrderedDict((key, i) for i, key in enumerate(set(freq_df["term"].tolist())))
+	dict_index_c = OrderedDict((key, i) for i, key in enumerate(set(freq_df["col"].tolist())))
+
+	size_t = len(dict_index_t)
+	size_c = len(dict_index_c)
+	matrix_x = sparse.lil_matrix((size_t, size_c))
+
+	for k, f_tc in freq_df.iterrows():
+		if f_tc.tolist()[1] >= 10:
+			ppmi = calc_PPMI(f_tc.tolist())
+			matrix_x[dict_index_t[f_tc[4]], dict_index_c[f_tc[5]]] = ppmi
+	# print matrix_x
+
+	fname_matrix_x = 'matrix_x'
+	io.savemat(fname_matrix_x, {'matrix_x': matrix_x})
+	print matrix_x
+
+	fname_dict_index_t = 'dict_index_t'
+	with open(fname_dict_index_t, 'w') as data_file:
+	    pickle.dump(dict_index_t, data_file)
 
 	return
 
 
 def task_85(wiki_data):
+
+	"""
+	85. 主成分分析による次元圧縮
+	84で得られた単語文脈行列に対して，主成分分析を適用し，単語の意味ベクトルを300次元に圧縮せよ．
+	"""
+
 
 	input_name = "./84_sample.csv"
 	main_df = pd.read_csv()
@@ -251,5 +278,5 @@ if __name__ == '__main__':
 	# task_82(wiki_data)
 	# task_83(wiki_data)
 	task_84(wiki_data)
-	task_85(wiki_data)
+	# task_85(wiki_data)
 
