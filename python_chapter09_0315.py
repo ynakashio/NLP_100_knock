@@ -1,3 +1,4 @@
+
 #coding:utf-8
 
 import csv
@@ -8,7 +9,8 @@ import random
 import numpy as np
 from nltk import tokenize
 import os
-from sklearn.decomposition import PCA
+import sklearn.decomposition
+# from sklearn.decomposition import PCA
 import pickle
 from scipy import sparse, io
 import sys
@@ -16,6 +18,7 @@ reload(sys)
 sys.setdefaultencoding("utf-8")
 import re
 import pandas as pd
+import scipy.spatial.distance as dis
 
 
 # ひとまず早いのでnltkで実装してみる。
@@ -60,7 +63,7 @@ def task_80(wiki_data):
 	output_name = './80_sample.txt'
 	f = open(output_name,"w")
 	f.write(output_str)
-	f.close
+	f.close()
 
 	# 以下は正規表現でやろうとして失敗。誰か教えてくださいw
 	# for tokenized_word in tokenize.word_tokenize(wiki_data):
@@ -105,15 +108,43 @@ def task_81(wiki_data):
 	country_name_file = "./country_name.txt"
 	f = open(country_name_file,"r")
 	countries = f.read()
+	f.close()
 
 	# 一単語目をkey、単語全体をvalueとして入れている
+	name_set=[]
 	country_name_dic = {}
 	for name in countries.split("\n"):
-		if len(name.split(" ")) > 2:
-			country_name_dic.update({name.split(" ")[0]:name})
+		splited_name = name.split(" ")
+		if len(splited_name) > 1:
+			name_set.append(name)
+			if not country_name_dic.has_key(splited_name[0]):
+				country_name_dic.update({splited_name[0]:[len(splited_name)]})
+			else:
+				country_name_dic[splited_name[0]].extend([len(splited_name)])
 	print "以下を単語辞書としてマッチさせる\n",country_name_dic
+	print name_set
 
-	# とりあえず先に進む
+	# ここから、置換作業
+	g = open("./80_sample.txt","r")
+	_80_data = g.readlines()
+	g.close()
+
+	h = open("./81_sample.txt","w")
+	for line in _80_data:
+		token_list = line.split(" ")
+		result = []
+		for i,token in enumerate(token_list):
+			if not token in country_name_dic.keys():
+				result.append(token_list[i])
+			else:
+				for length in country_name_dic[token]:
+					if " ".join(token_list[i : i+length]) in name_set:
+						result.append("_".join(token_list[i : i+length]))
+						i =i+length
+						# 二つ目の単語が混入するバグがあり
+
+		h.write(" ".join(result[0:len(result)]))
+	h.close()
 
 	return
 
@@ -129,7 +160,7 @@ def task_82(wiki_data):
 
 	# つまり、全ての単語に対して、文脈幅dをランダムに選んで表示するという問題?
 
-	f = open("./80_sample.txt","r")
+	f = open("./81_sample.txt","r")
 	wiki_data = f.read()
 
 	# リストにして配列番号で処理
@@ -243,10 +274,11 @@ def task_84(wiki_data):
 		N = int(87867)
 		return max(np.log(N*tc_list[1]/tc_list[1]*tc_list[2]),0)
 
-	_dic = {}
-	for i,tc_row in over10_df.iterrows():
-		_dic.update({tc_row[0]:{"ppmi":calc_PPMI(tc_row.tolist())}})
-	ppmi_df = pd.DataFrame.from_dict(_dic).T
+	# _dic = {}
+	# for i,tc_row in over10_df.iterrows():
+	# 	_dic.update({tc_row[0]:{"ppmi":calc_PPMI(tc_row.tolist())}})
+	# ppmi_df = pd.DataFrame.from_dict(_dic).T
+	# print ppmi_df
 
 	freq_df["term"] = freq_df["collocation"].str.split("\t").apply(lambda x: x[0])
 	freq_df["col"] = freq_df["collocation"].str.split("\t").apply(lambda x: x[1])
@@ -256,21 +288,14 @@ def task_84(wiki_data):
 
 	size_t = len(dict_index_t)
 	size_c = len(dict_index_c)
-	matrix_x = sparse.lil_matrix((size_t, size_c))
+	matrix_df = pd.DataFrame(index = dict_index_t.keys(), columns=dict_index_c.keys())
 
 	for k, f_tc in freq_df.iterrows():
 		if f_tc.tolist()[1] >= 10:
 			ppmi = calc_PPMI(f_tc.tolist())
-			matrix_x[dict_index_t[f_tc[4]], dict_index_c[f_tc[5]]] = ppmi
-	# print matrix_x
+			matrix_df.loc[f_tc[4], f_tc[5]] = ppmi
 
-	fname_matrix_x = 'matrix_x'
-	io.savemat(fname_matrix_x, {'matrix_x': matrix_x})
-	print matrix_x
-
-	fname_dict_index_t = 'dict_index_t'
-	with open(fname_dict_index_t, 'w') as data_file:
-	    pickle.dump(dict_index_t, data_file)
+	matrix_df.to_csv("./_re_84.tsv",sep="\t")#,index = False)
 
 	return
 
@@ -280,15 +305,125 @@ def task_85(wiki_data):
 	"""
 	85. 主成分分析による次元圧縮
 	84で得られた単語文脈行列に対して，主成分分析を適用し，単語の意味ベクトルを300次元に圧縮せよ．
+	http://qiita.com/segavvy/items/f1a7f3200c3b771e8568
 	"""
-	input_name = "./84_sample.csv"
-	main_df = pd.read_csv()
 
-	pca = PCA(n_components=2)
-	pca.fit(X)
-	print pca.get_covariance()
+	matrix_df = pd.read_csv("./_re_84.tsv",delimiter="\t").drop(0)
+	# print matrix_df
+	matrix_df.index = matrix_df.iloc[:,0]
+	del matrix_df["Unnamed: 0"]
+	matrix_df = matrix_df.fillna(0)
+	print matrix_df
+
+	t_list = matrix_df.index
+	c_list = matrix_df.columns
+
+	# ppmi_matrix = matrix_df.as_matrix(columns = None)
+	# print ppmi_matrix
+
+	clf = sklearn.decomposition.TruncatedSVD(300)
+	np_300 = clf.fit_transform(matrix_df)
+	print np_300.shape
+
+	vec_df = pd.DataFrame(np_300, index=matrix_df.index)
+	print vec_df
+	vec_df.to_csv("./85.tsv",sep="\t")
+
+	# PCAとSVDの違い
 
 	return
+
+
+def task_86(wiki_data):
+
+	"""
+	86. 単語ベクトルの表示
+	85で得た単語の意味ベクトルを読み込み，"United States"のベクトルを表示せよ．ただし，"United States"は内部的には"United_States"と表現されていることに注意せよ．
+	http://qiita.com/segavvy/items/d0cfabf328fd6d67d003
+	"""
+
+	vec_df = pd.read_csv("./85.tsv",delimiter="\t",index_col = "Unnamed: 0")
+	print vec_df
+
+	print vec_df.loc["meadows"]
+
+	# fname_dict_index_t = 'dict_index_t'
+	# fname_matrix_x300 = 'matrix_x300'
+
+	# # 辞書読み込み
+	# with open(fname_dict_index_t, 'rb') as data_file:
+	# 	dict_index_t = pickle.load(data_file)
+
+	# # 行列読み込み
+	# matrix_x300 = io.loadmat(fname_matrix_x300)['matrix_x300']
+
+	# # 'United States'の単語ベクトル表示
+	# print(matrix_x300[dict_index_t['United_States']])
+
+	return
+
+
+def task_87(wiki_data):
+
+	vec_df = pd.read_csv("./85.tsv",delimiter="\t",index_col = "Unnamed: 0")
+	print vec_df
+
+	tmp = vec_df.loc["limited"]
+
+	cosine_dic ={}
+	for i,row in vec_df.iterrows():
+		cosine_dic.update({i:{"value":dis.cosine(tmp, row)}})
+
+	cosine_df = pd.DataFrame.from_dict(cosine_dic).T
+	print cosine_df
+
+	# print  max(cosine_dic.values())
+
+	return
+
+
+def task_88():
+
+	vec_df = pd.read_csv("./85.tsv",delimiter="\t",index_col = "Unnamed: 0")
+	print vec_df
+
+	tmp = vec_df.loc["limited"]
+
+	cosine_dic ={}
+	for i,row in vec_df.iterrows():
+		cosine_dic.update({i:{"value":dis.cosine(tmp, row)}})
+
+	cosine_df = pd.DataFrame.from_dict(cosine_dic).T
+	print cosine_df
+
+	return
+
+def task_89():
+
+	vec_df = pd.read_csv("./85.tsv",delimiter="\t",index_col = "Unnamed: 0")
+
+	_1_df = vec_df.loc["nippon"]
+	_2_df = vec_df.loc["tokyo"]
+	_3_df = vec_df.loc["paris"]
+
+	tmp_df = _1_df + _2_df - _3_df
+	print tmp_df
+
+
+	cosine_dic ={}
+	for i,row in vec_df.iterrows():
+		cosine_dic.update({i:{"value":dis.cosine(tmp_df, row)}})
+	cosine_df = pd.DataFrame.from_dict(cosine_dic).T
+	print cosine_df
+
+	print cosine_df.sort_values(by="value",ascending = False)[:10]
+
+	# for i,keyword in enumerate(vec_df.index):
+	# 	if i < 30:
+	# 		print keyword
+
+	return
+
 
 
 
@@ -296,8 +431,11 @@ if __name__ == '__main__':
 	wiki_data = data_loader()
 	# task_80(wiki_data)
 	# task_81(wiki_data)
-	task_82(wiki_data)
+	# task_82(wiki_data)
 	# task_83(wiki_data)
-	task_84(wiki_data)
+	# task_84(wiki_data)
 	# task_85(wiki_data)
-
+	# task_86(wiki_data)
+	# task_87(wiki_data)
+	# task_88()
+	task_89()
