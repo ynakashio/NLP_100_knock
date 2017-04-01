@@ -8,6 +8,7 @@ import random
 import numpy as np
 from nltk import tokenize
 import os
+from sklearn.decomposition import PCA
 import pickle
 from scipy import sparse, io
 import sys
@@ -82,6 +83,24 @@ def task_81(wiki_data):
 
 	# tokenizeして、一単語目が同じだったらくっつけるメソッド
 
+	"""
+	ここのコード・考え方を参照している
+	http://qiita.com/segavvy/items/216888c3549cea3d8e81
+
+	国名一覧を読み込んで集合と辞書作成、ただし1語の国は含めない。
+	辞書には{ 最初の1語, [全体の語数1, 全体の語数2...] }を登録し、
+	全体の語数は降順でソートして格納する。
+	たとえば最初の1語が'United'の国は次の6つある。
+		United States of America
+		United Mexican States
+		United Kingdom of Great Britain and Northern Ireland
+		United Arab Emirates
+		United Republic of Tanzania
+		United States
+	この場合、全体の語数が4語、3語、8語、2語のものがあるので、
+	辞書には { 'United', [8, 4, 3, 2] } を登録する。
+	全体の個数を降順ソートするのは最長一致でマッチングさせるため。
+	"""
 
 	country_name_file = "./country_name.txt"
 	f = open(country_name_file,"r")
@@ -129,6 +148,7 @@ def task_82(wiki_data):
 				try:
 					tab_separted_context = target_word+"\t"+splited_data[context_index]+"\n"
 					output_string = output_string + tab_separted_context
+					print target_word,"\t",splited_data[context_index],"\n"
 				except:
 					print context_index,"nan"
 	print output_string
@@ -261,11 +281,12 @@ def task_85(wiki_data):
 	85. 主成分分析による次元圧縮
 	84で得られた単語文脈行列に対して，主成分分析を適用し，単語の意味ベクトルを300次元に圧縮せよ．
 	"""
-
-
 	input_name = "./84_sample.csv"
 	main_df = pd.read_csv()
 
+	pca = PCA(n_components=2)
+	pca.fit(X)
+	print pca.get_covariance()
 
 	return
 
@@ -275,7 +296,7 @@ if __name__ == '__main__':
 	wiki_data = data_loader()
 	# task_80(wiki_data)
 	# task_81(wiki_data)
-	# task_82(wiki_data)
+	task_82(wiki_data)
 	# task_83(wiki_data)
 	task_84(wiki_data)
 	# task_85(wiki_data)
