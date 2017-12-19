@@ -54,3 +54,8 @@ sys.setdefaultencoding("utf-8")
 ```
 
 <br>を記述する。
+
+## CoreNLPの使い方
+https://qiita.com/pawjun/items/4325464cecf938024ea5
+http://lab.astamuse.co.jp/entry/corenlp1
+Javaのコマンド打ちのが早い。

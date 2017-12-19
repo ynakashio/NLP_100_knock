@@ -27,8 +27,8 @@ import scipy.spatial.distance as dis
 
 def data_loader():
 
-	input_name = './sample.txt'
-	# file_name = "./enwiki-20150112-400-r100-10576.txt"
+	# input_name = './sample.txt'
+	input_name = "./enwiki-20150112-400-r100-10576.txt"
 	f = codecs.open(input_name, "r","utf-8")
 	wiki_data = str(f.read()).decode("utf-8")
 	f.close
@@ -60,7 +60,7 @@ def task_80(wiki_data):
 		output_str = output_str + " " + word
 	print output_str
 
-	output_name = './80_sample.txt'
+	output_name = './enwiki_80_sample.txt'
 	f = open(output_name,"w")
 	f.write(output_str)
 	f.close()
@@ -125,11 +125,11 @@ def task_81(wiki_data):
 	print name_set
 
 	# ここから、置換作業
-	g = open("./80_sample.txt","r")
+	g = open("./enwiki_80_sample.txt","r")
 	_80_data = g.readlines()
 	g.close()
 
-	h = open("./81_sample.txt","w")
+	h = open("./enwiki_81_sample.txt","w")
 	for line in _80_data:
 		token_list = line.split(" ")
 		result = []
@@ -160,7 +160,7 @@ def task_82(wiki_data):
 
 	# つまり、全ての単語に対して、文脈幅dをランダムに選んで表示するという問題?
 
-	f = open("./81_sample.txt","r")
+	f = open("./enwiki_81_sample.txt","r")
 	wiki_data = f.read()
 
 	# リストにして配列番号で処理
@@ -184,7 +184,7 @@ def task_82(wiki_data):
 					print context_index,"nan"
 	print output_string
 
-	output_file = "82_sample.txt"
+	output_file = "enwiki_82_sample.txt"
 	g = open(output_file,"w")
 	g.write(output_string)
 
@@ -204,7 +204,7 @@ def task_83(wiki_data):
 	N: 		単語と文脈語のペアの総出現回数
 	"""
 	# input_file = "resample.txt"
-	input_file = "./82_sample.txt"
+	input_file = "./enwiki_82_sample.txt"
 	f = open(input_file,"r")
 	tabbed_context = f.read()
 
@@ -233,7 +233,7 @@ def task_83(wiki_data):
 	print frequency_list
 	print "N:",len(tabbed_list)
 
-	output_file = "./83_sample.csv"
+	output_file = "./enwiki_83_sample.csv"
 	g = open(output_file,"w")
 	g.write(str(len(tabbed_list)))
 	g.write("\n")
@@ -262,7 +262,7 @@ def task_84(wiki_data):
 	N = int(87867)
 
 	# 一行目を削除してからファイルを開いてください
-	input_file = "./83_sample.csv"
+	input_file = "./enwiki_83_sample.csv"
 	freq_df = pd.read_csv(input_file,header=None)
 	freq_df.columns = ["collocation","tc","t*","*c"]
 	# print freq_df
@@ -295,7 +295,7 @@ def task_84(wiki_data):
 			ppmi = calc_PPMI(f_tc.tolist())
 			matrix_df.loc[f_tc[4], f_tc[5]] = ppmi
 
-	matrix_df.to_csv("./_re_84.tsv",sep="\t")#,index = False)
+	matrix_df.to_csv("./enwiki_84.tsv",sep="\t")#,index = False)
 
 	return
 
@@ -308,7 +308,7 @@ def task_85(wiki_data):
 	http://qiita.com/segavvy/items/f1a7f3200c3b771e8568
 	"""
 
-	matrix_df = pd.read_csv("./_re_84.tsv",delimiter="\t").drop(0)
+	matrix_df = pd.read_csv("./enwiki_84.tsv",delimiter="\t").drop(0)
 	# print matrix_df
 	matrix_df.index = matrix_df.iloc[:,0]
 	del matrix_df["Unnamed: 0"]
@@ -327,7 +327,7 @@ def task_85(wiki_data):
 
 	vec_df = pd.DataFrame(np_300, index=matrix_df.index)
 	print vec_df
-	vec_df.to_csv("./85.tsv",sep="\t")
+	vec_df.to_csv("./enwiki_85.tsv",sep="\t")
 
 	# PCAとSVDの違い
 
@@ -342,7 +342,7 @@ def task_86(wiki_data):
 	http://qiita.com/segavvy/items/d0cfabf328fd6d67d003
 	"""
 
-	vec_df = pd.read_csv("./85.tsv",delimiter="\t",index_col = "Unnamed: 0")
+	vec_df = pd.read_csv("./enwiki_85.tsv",delimiter="\t",index_col = "Unnamed: 0")
 	print vec_df
 
 	print vec_df.loc["meadows"]
@@ -365,7 +365,7 @@ def task_86(wiki_data):
 
 def task_87(wiki_data):
 
-	vec_df = pd.read_csv("./85.tsv",delimiter="\t",index_col = "Unnamed: 0")
+	vec_df = pd.read_csv("./enwiki_85.tsv",delimiter="\t",index_col = "Unnamed: 0")
 	print vec_df
 
 	tmp = vec_df.loc["limited"]
@@ -384,7 +384,7 @@ def task_87(wiki_data):
 
 def task_88():
 
-	vec_df = pd.read_csv("./85.tsv",delimiter="\t",index_col = "Unnamed: 0")
+	vec_df = pd.read_csv("./enwiki_85.tsv",delimiter="\t",index_col = "Unnamed: 0")
 	print vec_df
 
 	tmp = vec_df.loc["limited"]
@@ -400,7 +400,7 @@ def task_88():
 
 def task_89():
 
-	vec_df = pd.read_csv("./85.tsv",delimiter="\t",index_col = "Unnamed: 0")
+	vec_df = pd.read_csv("./enwiki_85.tsv",delimiter="\t",index_col = "Unnamed: 0")
 
 	_1_df = vec_df.loc["nippon"]
 	_2_df = vec_df.loc["tokyo"]
@@ -429,13 +429,13 @@ def task_89():
 
 if __name__ == '__main__':
 	wiki_data = data_loader()
-	# task_80(wiki_data)
-	# task_81(wiki_data)
-	# task_82(wiki_data)
-	# task_83(wiki_data)
-	# task_84(wiki_data)
-	# task_85(wiki_data)
-	# task_86(wiki_data)
-	# task_87(wiki_data)
-	# task_88()
+	task_80(wiki_data)
+	task_81(wiki_data)
+	task_82(wiki_data)
+	task_83(wiki_data)
+	task_84(wiki_data)
+	task_85(wiki_data)
+	task_86(wiki_data)
+	task_87(wiki_data)
+	task_88()
 	task_89()
